@@ -352,6 +352,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
 
         Bitmap bitmap = null;
         Uri uri = null;
+        Uri shaiUncompressedUri = null;
 
         // If sending base64 image back
         if (destType == DATA_URL) {
@@ -404,7 +405,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             } else {
                 // SHAI
                 Uri shaiUncompressedInputUri = getUriFromMediaStore();
-                Uri shaiUncompressedUri = Uri.fromFile(new File(FileHelper.getRealPath(shaiUncompressedInputUri, this.cordova)));
+                shaiUncompressedUri = Uri.fromFile(new File(FileHelper.getRealPath(shaiUncompressedInputUri, this.cordova)));
                 writeUncompressedImage(shaiUncompressedUri);
                 // /SHAI
 
@@ -441,7 +442,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             throw new IllegalStateException();
         }
 
-        this.cleanup(FILE_URI, this.imageUri, uri, bitmap);
+        this.cleanup(FILE_URI, this.imageUri, shaiUncompressedUri, bitmap);
         bitmap = null;
     }
 
@@ -892,7 +893,7 @@ private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
 
         checkForDuplicateImage(imageType);
         // Scan for the gallery to update pic refs in gallery
-        if (this.saveToPhotoAlbum && newImage != null) {
+        if (/* SHAI: this.saveToPhotoAlbum && */ newImage != null) {
             this.scanForGallery(newImage);
         }
 
@@ -990,7 +991,7 @@ private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
 
     public void onMediaScannerConnected() {
         try{
-            this.conn.scanFile(this.scanMe.toString(), "image/*");
+            this.conn.scanFile(this.scanMe.toString().replace("file://", ""), null);
         } catch (java.lang.IllegalStateException e){
             LOG.e(LOG_TAG, "Can't scan file in MediaScanner after taking picture");
         }
