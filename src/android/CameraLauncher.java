@@ -402,6 +402,12 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
 
                 this.callbackContext.success(uri.toString());
             } else {
+                // SHAI
+                Uri shaiUncompressedInputUri = getUriFromMediaStore();
+                Uri shaiUncompressedUri = Uri.fromFile(new File(FileHelper.getRealPath(shaiUncompressedInputUri, this.cordova)));
+                writeUncompressedImage(shaiUncompressedUri);
+                // /SHAI
+
                 bitmap = getScaledBitmap(FileHelper.stripFileProtocol(imageUri.toString()));
 
                 if (rotate != 0 && this.correctOrientation) {
@@ -909,6 +915,12 @@ private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
         if (type == FILE_URI && this.saveToPhotoAlbum) {
             diff = 2;
         }
+
+        // SHAI
+        if (type == FILE_URI) { // we use this to make the previous if still hold. Even though saveToPhotoAlbum, is false, we explicitly do save to photo album earlier on as a hack.
+            diff = 2;
+        }
+        // /SHAI
 
         // delete the duplicate file if the difference is 2 for file URI or 1 for Data URL
         if ((currentNumOfImages - numPics) == diff) {
